@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { AuthScreen } from "./components/AuthScreen";
-import { StudentHome } from "./components/StudentHome";
+import { StudentDashboard } from "./components/StudentDashboard";
 import { VendorDetail } from "./components/VendorDetail";
 import { OrderPlacement } from "./components/OrderPlacement";
-import { OrderTracking } from "./components/OrderTracking";
 import { VendorDashboard } from "./components/VendorDashboard";
-import { ProfileManagement } from "./components/ProfileManagement";
 import { VendorOnboarding } from "./components/VendorOnboarding";
 import { AdminUsersDashboard } from "./components/AdminUsersDashboard";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -16,12 +14,10 @@ import { supabase } from "./utils/supabase/client";
 type Screen = 
   | "welcome" 
   | "auth" 
-  | "student-home" 
+  | "student-dashboard"
   | "vendor-detail" 
-  | "order-placement" 
-  | "order-tracking"
+  | "order-placement"
   | "vendor-dashboard"
-  | "profile"
   | "vendor-onboarding"
   | "admin-users";
 
@@ -57,7 +53,7 @@ export default function App() {
         if (!error && data.user) {
           setUserId(storedUserId);
           setUserRole(storedRole);
-          setCurrentScreen(storedRole === "vendor" ? "vendor-dashboard" : "student-home");
+          setCurrentScreen(storedRole === "vendor" ? "vendor-dashboard" : "student-dashboard");
         } else {
           // Invalid session, clear storage
           handleLogout();
@@ -76,7 +72,7 @@ export default function App() {
     if (role === "vendor") {
       setCurrentScreen("vendor-dashboard");
     } else {
-      setCurrentScreen("student-home");
+      setCurrentScreen("student-dashboard");
     }
   };
 
@@ -102,22 +98,25 @@ export default function App() {
   };
 
   const handleOrderSuccess = () => {
-    setCurrentScreen("order-tracking");
+    // Stay in student dashboard, the orders tab will be shown
+    setCurrentScreen("student-dashboard");
   };
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
-        {/* Floating Admin Access Button - Shows on all screens */}
-        <button
-          onClick={() => setShowAdminPanel(true)}
-          className="fixed bottom-4 right-4 z-40 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all hover:scale-110"
-          title="Add Vendor (or press Ctrl+Shift+V)"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </button>
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors overflow-x-hidden">
+        {/* Floating Admin Access Button - Shows on all screens except student dashboard */}
+        {currentScreen !== "student-dashboard" && (
+          <button
+            onClick={() => setShowAdminPanel(true)}
+            className="fixed bottom-4 right-4 z-40 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all hover:scale-110"
+            title="Add Vendor (or press Ctrl+Shift+V)"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+        )}
 
         {/* Admin Panel Overlay - Access with Ctrl+Shift+V or click floating button */}
         {showAdminPanel && (
@@ -159,12 +158,10 @@ export default function App() {
           />
         )}
 
-        {currentScreen === "student-home" && userId && (
-          <StudentHome
+        {currentScreen === "student-dashboard" && userId && (
+          <StudentDashboard
             userId={userId}
             onVendorSelect={handleVendorSelect}
-            onViewOrders={() => setCurrentScreen("order-tracking")}
-            onViewProfile={() => setCurrentScreen("profile")}
             onLogout={handleLogout}
           />
         )}
@@ -172,7 +169,7 @@ export default function App() {
         {currentScreen === "vendor-detail" && selectedVendor && (
           <VendorDetail
             vendor={selectedVendor}
-            onBack={() => setCurrentScreen("student-home")}
+            onBack={() => setCurrentScreen("student-dashboard")}
             onPlaceOrder={handlePlaceOrder}
           />
         )}
@@ -185,24 +182,10 @@ export default function App() {
           />
         )}
 
-        {currentScreen === "order-tracking" && userId && (
-          <OrderTracking
-            userId={userId}
-            onBack={() => setCurrentScreen("student-home")}
-          />
-        )}
-
         {currentScreen === "vendor-dashboard" && userId && (
           <VendorDashboard
             userId={userId}
             onLogout={handleLogout}
-          />
-        )}
-
-        {currentScreen === "profile" && userId && (
-          <ProfileManagement
-            userId={userId}
-            onBack={() => setCurrentScreen("student-home")}
           />
         )}
 

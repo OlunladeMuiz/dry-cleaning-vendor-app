@@ -40,14 +40,22 @@ export interface Order {
   id: string;
   studentId: string;
   vendorId: string;
+  vendorName?: string;
   services: Service[];
+  items: Array<{
+    serviceName: string;
+    quantity: number;
+    price: number;
+  }>;
   pickupAddress: string;
   deliveryAddress: string;
   pickupTime: string;
   paymentMethod: string;
   notes: string;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  status: 'pending' | 'processing' | 'ready' | 'delivered' | 'cancelled';
+  total: number;
   totalPrice: number;
+  estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
 }

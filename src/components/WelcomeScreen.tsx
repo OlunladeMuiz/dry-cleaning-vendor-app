@@ -11,14 +11,14 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onGetStarted, onAdminAccess, onViewUsers }: WelcomeScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 dark:from-blue-900 dark:via-purple-900 dark:to-gray-900 flex flex-col items-center justify-center p-4 sm:p-6 text-white overflow-y-auto relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 dark:from-blue-900 dark:via-purple-900 dark:to-gray-900 flex flex-col items-center justify-center p-4 text-white relative overflow-x-hidden">
       {/* Theme Toggle - Top Right */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-10">
         <ThemeToggle variant="ghost" className="text-white hover:bg-white/20" />
       </div>
       
-      <div className="max-w-md w-full text-center space-y-4 sm:space-y-8 py-6 sm:py-0">
-        <div className="space-y-3 sm:space-y-6">
+      <div className="max-w-md w-full text-center space-y-6 sm:space-y-8">
+        <div className="space-y-4 sm:space-y-5">
           <div className="flex justify-center">
             <TrinityLogo variant="wordmark" size="xl" />
           </div>
@@ -27,21 +27,21 @@ export function WelcomeScreen({ onGetStarted, onAdminAccess, onViewUsers }: Welc
             <h1 
               className="font-display tracking-tight"
               style={{ 
-                fontSize: 'clamp(28px, 8vw, 48px)', 
+                fontSize: 'clamp(24px, 7vw, 40px)', 
                 fontWeight: 800, 
-                lineHeight: 1.1 
+                lineHeight: 1.2 
               }}
             >
               Your Campus Dry Cleaning Marketplace
             </h1>
-            <p className="text-base sm:text-xl text-blue-100 mt-2 sm:mt-4">
+            <p className="text-sm sm:text-lg text-blue-100 mt-2 sm:mt-3">
               Connecting Trinity students with local vendors
             </p>
           </div>
         </div>
 
-        <div className="space-y-3 sm:space-y-4 pt-4 sm:pt-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 space-y-2 sm:space-y-3">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-5 space-y-2 sm:space-y-3">
             <div className="flex items-start gap-3">
               <div className="bg-white/20 rounded-full p-2 mt-1">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export function WelcomeScreen({ onGetStarted, onAdminAccess, onViewUsers }: Welc
 
           <Button 
             onClick={onGetStarted}
-            className="w-full bg-white text-blue-600 hover:bg-blue-50 py-4 sm:py-6 text-base sm:text-lg"
+            className="w-full bg-white text-blue-600 hover:bg-blue-50 py-3 sm:py-5 text-base sm:text-lg"
             size="lg"
           >
             Get Started
@@ -92,7 +92,7 @@ export function WelcomeScreen({ onGetStarted, onAdminAccess, onViewUsers }: Welc
             <Button 
               onClick={onAdminAccess}
               variant="outline"
-              className="w-full border-2 border-white/30 text-white hover:bg-white/10 hover:text-white py-3 sm:py-4"
+              className="w-full border-2 border-white/30 text-white hover:bg-white/10 hover:text-white py-2.5 sm:py-3"
               size="lg"
             >
               <Settings className="w-4 h-4 mr-2" />
@@ -104,7 +104,7 @@ export function WelcomeScreen({ onGetStarted, onAdminAccess, onViewUsers }: Welc
             <Button 
               onClick={onViewUsers}
               variant="outline"
-              className="w-full border-2 border-white/30 text-white hover:bg-white/10 hover:text-white py-3 sm:py-4"
+              className="w-full border-2 border-white/30 text-white hover:bg-white/10 hover:text-white py-2.5 sm:py-3"
               size="lg"
             >
               <Users className="w-4 h-4 mr-2" />

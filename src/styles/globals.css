@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Poppins:wght@700;800;900&family=Montserrat:wght@700;800;900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -6,6 +6,7 @@
   --font-size: 16px;
   --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-brand: 'Montserrat', 'Poppins', 'Outfit', system-ui, -apple-system, sans-serif;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;

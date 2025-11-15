@@ -18,11 +18,13 @@ interface AuthScreenProps {
 export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccessMessage("");
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -44,12 +46,29 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
             phone,
             address,
           },
+          emailRedirectTo: window.location.origin,
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Handle specific error cases
+        if (signUpError.message.includes("already been registered")) {
+          throw new Error("This email is already registered. Please try logging in instead.");
+        }
+        if (signUpError.message.includes("Email not confirmed")) {
+          throw new Error("Please check your email and confirm your account before logging in.");
+        }
+        throw signUpError;
+      }
 
       if (signUpData.user) {
+        // Check if email confirmation is required
+        if (signUpData.user.identities && signUpData.user.identities.length === 0) {
+          setError("This email is already registered. Please try logging in instead.");
+          setIsLoading(false);
+          return;
+        }
+
         // Also try to call the backend API if it exists
         try {
           await apiRequest("/signup", {
@@ -61,24 +80,34 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
           console.log("Backend API not available, using Supabase Auth only");
         }
 
-        // Sign in after signup
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) throw signInError;
-
-        if (data.session) {
-          localStorage.setItem("access_token", data.session.access_token);
+        // Check if user needs to confirm email
+        if (signUpData.session) {
+          // Auto sign-in successful (email confirmation disabled)
+          localStorage.setItem("access_token", signUpData.session.access_token);
           localStorage.setItem("user_id", signUpData.user.id);
           localStorage.setItem("user_role", role);
           onAuthSuccess(signUpData.user.id, role);
+        } else {
+          // Email confirmation required
+          setError("Account created! Please check your email to confirm your account, then log in.");
+          setIsLoading(false);
         }
       }
     } catch (err: any) {
       console.error("Signup error:", err);
-      setError(err.message || "Failed to sign up. Please try again.");
+      
+      // Friendly error messages
+      let errorMessage = err.message || "Failed to sign up. Please try again.";
+      
+      if (errorMessage.includes("rate limit")) {
+        errorMessage = "Too many attempts. Please wait a minute and try again.";
+      } else if (errorMessage.includes("Invalid email")) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (errorMessage.includes("Password should be at least")) {
+        errorMessage = "Password must be at least 6 characters long.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +117,7 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccessMessage("");
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -99,7 +129,18 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        // Handle email not confirmed error
+        if (signInError.message.includes("Email not confirmed")) {
+          setError(
+            "Your email is not confirmed yet. Please check your inbox for a confirmation email. " +
+            "If you didn't receive it, you can request a new one below."
+          );
+          setIsLoading(false);
+          return;
+        }
+        throw signInError;
+      }
 
       if (data.session && data.user) {
         localStorage.setItem("access_token", data.session.access_token);
@@ -110,7 +151,47 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
       }
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.message || "Failed to log in. Please check your credentials.");
+      
+      // Friendly error messages
+      let errorMessage = err.message || "Failed to log in. Please check your credentials.";
+      
+      if (errorMessage.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. Please try again.";
+      } else if (errorMessage.includes("Email not confirmed")) {
+        errorMessage = "Your email is not confirmed yet. Please check your inbox for a confirmation email.";
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    const emailInput = document.getElementById("login-email") as HTMLInputElement;
+    const email = emailInput?.value;
+
+    if (!email) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) throw error;
+
+      setSuccessMessage("Confirmation email sent! Please check your inbox and spam folder.");
+    } catch (err: any) {
+      console.error("Resend error:", err);
+      setError(err.message || "Failed to resend confirmation email. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -170,6 +251,12 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
                     </div>
                   )}
 
+                  {successMessage && (
+                    <div className="text-sm text-green-600 bg-green-50 p-3 rounded">
+                      {successMessage}
+                    </div>
+                  )}
+
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
@@ -179,6 +266,15 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
                     ) : (
                       "Log In"
                     )}
+                  </Button>
+
+                  <Button
+                    variant="link"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                    onClick={handleResendConfirmation}
+                    disabled={isLoading}
+                  >
+                    Resend confirmation email
                   </Button>
                 </form>
               </TabsContent>
@@ -256,6 +352,12 @@ export function AuthScreen({ onBack, onAuthSuccess }: AuthScreenProps) {
                   {error && (
                     <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
                       {error}
+                    </div>
+                  )}
+
+                  {successMessage && (
+                    <div className="text-sm text-green-600 bg-green-50 p-3 rounded">
+                      {successMessage}
                     </div>
                   )}
 
