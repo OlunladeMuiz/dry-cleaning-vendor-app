@@ -64,13 +64,6 @@ This project demonstrates a strong blend of product thinking, front-to-back engi
 - **Order Completion Rate:** Percent of placed orders that complete successfully without manual intervention.
 - **NPS / Satisfaction:** Short surveys or in-app rating after pickup/delivery.
 
-### How Recruiters Should Evaluate This Project
-
-- **Product Thinking:** Look for rationale in commit messages and docs that explain why features exist (user problem → solution → outcome).
-- **Code Quality:** Assess component reuse, TypeScript typing, and separation of concerns in `src/components`, `contexts`, and `utils`.
-- **Integration Skill:** Examine how the app integrates with Supabase, environment configuration, and how server-side logic (functions) is structured.
-- **Testing & CI:** Prefer projects with unit/integration tests and automated pipelines. If missing, note this as an opportunity to add `vitest`/`jest` and a GitHub Actions workflow.
-
 ### Visuals & Stickers
 
 To make the repository more attractive to recruiters and reviewers, this project includes a small set of lightweight SVG stickers and icons in `assets/stickers/`. They are intentionally simple, vector-based, and fully editable so you can reuse them across the README, landing pages, or demo mockups.
